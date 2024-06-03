@@ -2,47 +2,40 @@ using DifferentialEquations
 using QuadGK;
 using Plots; gr()
 
+
 # Vars
-tSpan = range(0.0,2.0)
-a1 = 0.5
-a2 = 0.01
-b = 0
+tSpan = (0.0,15.0)
+a = (0.5,0.3)
+b = 1
+v1_0 = 5
+v2_0 = 10
+
 
 # Functions
-f1(t) = 0
-f2(t) = 0
+f1(t) = 2*t
+f2(t) = 2
 
-v1_0 = 5
-v1(t) = quadgk(f1, 0, t)[1] + v1_0
-p1(t) = a1*v1(t)
+function func(du, u, p, t) 
+    du[1] = f1(t) - a[1]*u[1] + b*a[2]*u[2] 
+    du[2] = f2(t) - a[2]*u[2] - b*a[2]*u[2]
+end
 
-v2_0 = 10
-v2(t) = quadgk(p1, 0, t)[1] + quadgk(f2, 0, t)[1] + v2_0
-p2(t) = a2*v2(t)
+problem = ODEProblem(func, [v1_0; v2_0], tSpan)
 
-R(t) = b*p2(t)
-
-# Tanks
-t1(t) = v1(t) - quadgk(p1, 0, t)[1] + quadgk(R, 0, t)[1]
-t2(t) = v2(t) - quadgk(p2, 0, t)[1]
 
 # Plot
 p = plot()
 function PlotInputs() 
-    plot!(p, tSpan, f1, label="F1")
-    plot!(p, tSpan, f2, label="F2")
+    plot!(p, range(0,15), f1, label="F1")
+    plot!(p, range(0,15), f2, label="F2")
 end
 
-function PlotPhi() 
-    plot!(p, tSpan, p1, label="P1")
-    plot!(p, tSpan, p2, label="P2")
-end
 
 function PlotVolume()
-    plot!(p, tSpan, t1, label="Vol. Tank 1")
-    plot!(p, tSpan, t2, label="Vol. Tank 2")
+    sol = solve(problem, Tsit5())
+
+    plot!(p, sol)
 end
 
-# PlotInputs()
-# PlotPhi()
+PlotInputs()
 PlotVolume()
