@@ -5,8 +5,8 @@ using Plots; gr()
 
 # Vars
 tSpan = (0.0,15.0)
-a = (1,1)
-b = 0
+α = (1,1)
+β = 0
 v1_0 = 5
 v2_0 = 10
 
@@ -16,9 +16,9 @@ f1(t) = 0
 f2(t) = 0
 
 function func(du, u, p, t) 
-    du[1] = f1(t) - a[1]*u[1] + b*a[2]*u[2] 
-    du[2] = f2(t) + a[1]*u[1] - a[2]*u[2] - b*a[2]*u[2]
-    du[3] = (1-b)*a[2]*u[2]
+    du[1] = f1(t) - α[1]*u[1] + β*α[2]*u[2] 
+    du[2] = f2(t) + α[1]*u[1] - α[2]*u[2] - β*α[2]*u[2]
+    du[3] = (1-β)*α[2]*u[2]
 end
 
 problem = ODEProblem(func, [v1_0; v2_0; 0], tSpan)
