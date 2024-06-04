@@ -7,14 +7,14 @@ using Plots; gr()
 tSpan = (0.0,15.0)
 α = (1,1)
 β = 0
-γ = (0.11,0.22)
+γ = (0.40,0.22)
 v1_0 = 5
 v2_0 = 10
 
 
 # Functions
-f1(t) = 0
-f2(t) = 0
+f1(t) = 2*t*t
+f2(t) = 2
 
 function func(du, u, p, t) 
     du[1] = f1(t) - α[1]*u[1] + β*α[2]*u[2] 
