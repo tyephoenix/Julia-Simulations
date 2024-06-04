@@ -1,14 +1,12 @@
 using DifferentialEquations
-using QuadGK;
 using Plots; gr()
 
 
 # Vars
 tSpan = (0.0,35.0)
-α = (0.8,0.4)
-β = 0.4
-v1_0 = 5
-v2_0 = 20
+α = (1,1)
+β = 0
+u0 = (10,25)
 
 
 # Functions
@@ -17,18 +15,18 @@ f2(t) = 0
 
 function func(du, u, p, t) 
     du[1] = f1(t) - α[1]*u[1] + β*α[2]*u[2] 
-    du[2] = f2(t) + α[1]*u[1] - α[2]*u[2] - β*α[2]*u[2]
+    du[2] = f2(t) + α[1]*u[1] - α[2]*u[2]
     du[3] = (1-β)*α[2]*u[2]
 end
 
-problem = ODEProblem(func, [v1_0; v2_0; 0], tSpan)
+problem = ODEProblem(func, [u0[1]; u0[2]; 0], tSpan)
 
 
 # Plot
 p = plot()
 function PlotInputs() 
-    plot!(p, range(0,15), f1, label="F1")
-    plot!(p, range(0,15), f2, label="F2")
+    plot!(p, range(tSpan[1],tSpan[2]), f1, label="F1")
+    plot!(p, range(tSpan[1],tSpan[2]), f2, label="F2")
 end
 
 function PlotVolume()

@@ -1,24 +1,22 @@
 using DifferentialEquations
-using QuadGK;
 using Plots; gr()
 
 
 # Vars
 tSpan = (0.0,15.0)
-α = (1,1)
+α = (0.5,0.5)
 β = 0
-γ = (0.40,0.22)
-v1_0 = 5
-v2_0 = 10
+γ = (0.22,0.11)
+u0 = (10,25)
 
 
 # Functions
-f1(t) = 2*t*t
-f2(t) = 2
+f1(t) = 0
+f2(t) = t
 
 function func(du, u, p, t) 
     du[1] = f1(t) - α[1]*u[1] + β*α[2]*u[2] 
-    du[2] = f2(t) + α[1]*u[1] - α[2]*u[2] - β*α[2]*u[2]
+    du[2] = f2(t) + α[1]*u[1] - α[2]*u[2]
     du[3] = (1-β)*α[2]*u[2]
 end
 
@@ -29,14 +27,14 @@ function noise(du, u, p, t)
 end
 
 dt = 1/(2^(4))
-problem = SDEProblem(func, noise, [v1_0; v2_0; 0], tSpan)
+problem = SDEProblem(func, noise, [u0[1]; u0[2]; 0], tSpan)
 
 
 # Plot
 p = plot()
 function PlotInputs() 
-    plot!(p, range(0,15), f1, label="F1")
-    plot!(p, range(0,15), f2, label="F2")
+    plot!(p, range(tSpan[1],tSpan[2]), f1, label="F1")
+    plot!(p, range(tSpan[1],tSpan[2]), f2, label="F2")
 end
 
 function PlotVolume()
