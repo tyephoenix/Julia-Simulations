@@ -126,5 +126,5 @@ regulateFeed()
 regulatePH()
 
 # PlotInputs()
-# PlotOutputs()
-PlotVolume()
+PlotOutputs()
+# PlotVolume()
