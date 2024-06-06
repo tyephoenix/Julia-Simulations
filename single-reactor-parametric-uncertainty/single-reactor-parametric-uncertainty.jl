@@ -1,6 +1,8 @@
 using DifferentialEquations
 using Distributions
 using StatsPlots; gr()
+using Optimization
+using OptimizationNLopt
 
 
 # Vars
@@ -82,26 +84,25 @@ function Graph()
     plot!(graph, sum, fillalpha=0.3, width=1, legend=:topright, label=["Ca" "Cb" "Cc" "Cd" "q2"])
     display(graph)
 
-    println(size(sim))
-    println(sim[2,18,1])
-
-    function Minimize(j) 
-        lV = Inf
+    function Maximize(j) 
+        arr = sim
+        l = size(arr)[2] - 2
+        hV = 0
         tr = 0
         for i in 1:trajectories
-            v = sim[j,size(sim)[2],i]
-            if v < lV
-                lV = v
+            v = arr[j,l,i]
+            if v > hV
+                hV = v
                 tr = i
             end
         end
         return map[tr]
     end
-    println(Minimize(2))
+    println(Maximize(4))
 end
 function Save(dir) 
     savefig(string(@__DIR__, "/figs/$dir.png"))
 end
 
 Graph()
-# Save("broken-faulty")
+Save("broken-faulty")
