@@ -22,8 +22,8 @@ Cb = (7.35,1.72578,3.5)
 Cc = (0.00957,0)
 Cd = (0.07531,0.0025)
 
-k1_dist = Uniform(k1[1]*10, k1[2]*10)
-k2_dist = Uniform(k2[1]*10, k2[2]*10)
+k1_dist = Uniform(k1[1], k1[2])
+k2_dist = Uniform(k2[1], k2[2])
 
 # ODE
 function func(dx, x, θ, t) 
@@ -32,7 +32,7 @@ function func(dx, x, θ, t)
     dx[3] = -x[3]*((q1+θ[3])/V) + x[1]*x[2]*θ[1] - x[2]*x[3]*k3
     dx[4] = -x[4]*((q1+θ[3])/V) + x[1]*x[2]*θ[2] - x[2]*x[4]*k4
 end
-problem = ODEProblem(func,[Ca[3]; Cb[3]; Cc[2]; Cd[2]], tSpan, [k1[3];k2[3];q2])
+problem = ODEProblem(func, [Ca[3]; Cb[3]; Cc[2]; Cd[2]], tSpan, [k1[3];k2[3];q2])
 
 
 # Runtime
@@ -81,8 +81,7 @@ function Graph()
     ensemble = EnsembleProblem(problem, prob_func = prob)
     sim = solve(ensemble, Tsit5(), EnsembleThreads(), trajectories=trajectories, callback=CallbackSet(cbs...), tstops=tStops)
     sum = EnsembleSummary(sim, tSpan[1]:0.1:tSpan[2])
-    plot!(graph, sum, fillalpha=0.3, width=1, legend=:topright, label=["Ca" "Cb" "Cc" "Cd" "q2"])
-    display(graph)
+    plot!(graph, sum, fillalpha=0.3, width=0, label=["" "" "" ""])
 
     function Maximize(j) 
         arr = sim
@@ -98,11 +97,31 @@ function Graph()
         end
         return map[tr]
     end
-    println(Maximize(4))
+    function MaximizeOpt(j) 
+        function optFunc(x, p) 
+            sol = solve(problem, Tsit5(), p=[x[1],x[2],q2], saveat=tSpan[1]:0.1:tSpan[2])
+            v = sol.u[size(sol.t)[1]]
+            return -v[j]
+        end
+        opt = OptimizationFunction(optFunc)
+        optProb = Optimization.OptimizationProblem(opt, [k1[1],k2[2]], [1.0], lb = [k1[1],k2[1]], ub = [k1[2],k2[2]])
+        sol = solve(optProb, NLopt.LN_NELDERMEAD())
+        return sol.u
+    end
+
+    # println(Maximize(1))
+    # println(MaximizeOpt(1))
+    # println(Maximize(2))
+    # println(MaximizeOpt(2))
+    # println(Maximize(3))
+    # println(MaximizeOpt(3))
+    # println(Maximize(4))
+    # println(MaximizeOpt(4))
+    plot!(graph, solve(problem, Tsit5(), p=[MaximizeOpt(4)..., q2]), legend=:topright, label=["Ca" "Cb" "Cc" "Cd"])
 end
 function Save(dir) 
     savefig(string(@__DIR__, "/figs/$dir.png"))
 end
 
 Graph()
-Save("broken-faulty")
+# Save("broken-faulty")

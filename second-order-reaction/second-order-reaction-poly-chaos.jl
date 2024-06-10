@@ -1,5 +1,6 @@
 using DifferentialEquations
 using Plots; gr()
+using PolyChaos
 
 
 # Vars
@@ -9,7 +10,7 @@ u0 = (1,1)
 k = [0.1,0.9,0.66]
 Rab = 0.2
 # Ensemble
-trajectories = 1000
+trajectories = 100
 
 function func(du, u, p, t) 
     du[1] = -p[1]*u[1]*Rab
@@ -29,9 +30,11 @@ function Graph(x)
 end
 function Ensemble() 
     ti = time()
+    uniform01 = Uniform01OrthoPoly(6)
+    pce_uniform = convert2affinePCE(k[1],k[2],uniform01)
+    samples = evaluatePCE(pce_uniform, sampleMeasure(trajectories,uniform01),uniform01)
     function prob(prob,i,repeat)
-        j = (i-1)*((k[2]-k[1])/trajectories) + k[1]
-        prob.p[1] = j
+        prob.p[1] = samples[i]
         return prob
     end
     ensemble = EnsembleProblem(problem, prob_func=prob)
@@ -61,7 +64,7 @@ funca = OptimizationFunction(opt)
 probl = Optimization.OptimizationProblem(funca, x0, [1.0], lb = k[1], ub = k[2])
 sol = solve(probl, NLopt.LN_NELDERMEAD())
 
-print(sol)
+# print(sol)
 Ensemble()
 Graph(sol.u[1])
-# Save("optimization")
+Save("poly-chaos-optimization")
