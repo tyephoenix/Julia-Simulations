@@ -3,6 +3,7 @@ using Distributions
 using StatsPlots; gr()
 using Optimization
 using OptimizationNLopt
+using PolyChaos
 
 
 # Vars
@@ -22,8 +23,6 @@ Cb = (7.35,1.72578,3.5)
 Cc = (0.00957,0)
 Cd = (0.07531,0.0025)
 
-k1_dist = Uniform(k1[1], k1[2])
-k2_dist = Uniform(k2[1], k2[2])
 
 # ODE
 function func(dx, x, θ, t) 
@@ -62,16 +61,17 @@ end
 # Plot
 function Graph() 
     graph = plot(title="Bilinear Reaction Network", xlabel="Time (s)", ylabel="Concentraion (L/mol)", dpi=600)
+    k1_uniform01 = Uniform01OrthoPoly(6)
+    k1_pce_uniform = convert2affinePCE(k1[1],k1[2],uniform01)
+    k1_samples = evaluatePCE(pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
+    k2_uniform01 = Uniform01OrthoPoly(6)
+    k2_pce_uniform = convert2affinePCE(k2[1],k2[2],uniform01)
+    k2_samples = evaluatePCE(pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
     function prob(prob, i, repeat)
         c = floor(sqrt(trajectories))
 
-        k1_x = floor(((i-1)/c))*((maximum(k1_dist) - minimum(k1_dist)) / c) + minimum(k1_dist)
-        k1_p = pdf(k1_dist, k1_x)
-        prob.p[1] = k1_x
-
-        k2_x = (mod(i-1, c)+1)*((maximum(k2_dist) - minimum(k2_dist)) / c) + minimum(k2_dist)
-        k2_p = pdf(k2_dist, k2_x)
-        prob.p[2] = k2_x
+        prob.p[1] = k1_samples[Int(floor(((i-1)/c))+1)]
+        prob.p[2] = k2_samples[Int(mod(i-1, c)+1)]
 
         return prob
     end
@@ -80,20 +80,6 @@ function Graph()
     sum = EnsembleSummary(sim, tSpan[1]:0.1:tSpan[2])
     plot!(graph, sum, fillalpha=0.3, width=0, label=["" "" "" ""])
 
-    # function Maximize(j) 
-    #     arr = sim
-    #     l = size(arr)[2] - 2
-    #     hV = 0
-    #     tr = 0
-    #     for i in 1:trajectories
-    #         v = arr[j,l,i]
-    #         if v > hV
-    #             hV = v
-    #             tr = i
-    #         end
-    #     end
-    #     return map[tr]
-    # end
     function MaximizeOpt(j) 
         function optFunc(x, p) 
             sol = solve(problem, Tsit5(), p=[x[1],x[2],q2], saveat=tSpan[1]:0.1:tSpan[2], callback=CallbackSet(cbs...), tstops=tStops)
@@ -106,7 +92,7 @@ function Graph()
         return sol.u
     end
 
-    plot!(graph, solve(problem, Tsit5(), p=[MaximizeOpt(4)..., q2], callback=CallbackSet(cbs...), tstops=tStops), legend=:topright, label=["Ca" "Cb" "Cc" "Cd"])
+    plot!(graph, solve(problem, Tsit5(), p=[MaximizeOpt(2)..., q2], callback=CallbackSet(cbs...), tstops=tStops), legend=:topright, label=["Ca" "Cb" "Cc" "Cd"])
 end
 function Save(dir) 
     savefig(string(@__DIR__, "/figs/$dir.png"))
