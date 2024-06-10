@@ -93,10 +93,11 @@ function Graph()
     end
 
     plot!(graph, solve(problem, Tsit5(), p=[MaximizeOpt(2)..., q2], callback=CallbackSet(cbs...), tstops=tStops), legend=:topright, label=["Ca" "Cb" "Cc" "Cd"])
+    display(graph)
 end
 function Save(dir) 
     savefig(string(@__DIR__, "/figs/$dir.png"))
 end
 
 Graph()
-# Save("broken-faulty")
+Save("stable-poly-chaos")
