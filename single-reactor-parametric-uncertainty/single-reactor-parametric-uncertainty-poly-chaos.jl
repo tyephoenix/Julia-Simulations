@@ -4,6 +4,9 @@ using StatsPlots; gr()
 using Optimization
 using OptimizationNLopt
 using PolyChaos
+using Random
+
+Random.seed!(25)
 
 
 # Vars
@@ -61,12 +64,11 @@ end
 # Plot
 function Graph() 
     graph = plot(title="Bilinear Reaction Network", xlabel="Time (s)", ylabel="Concentraion (L/mol)", dpi=600)
-    k1_uniform01 = Uniform01OrthoPoly(6)
+    uniform01 = Uniform01OrthoPoly(6)
     k1_pce_uniform = convert2affinePCE(k1[1],k1[2],uniform01)
-    k1_samples = evaluatePCE(pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
-    k2_uniform01 = Uniform01OrthoPoly(6)
+    k1_samples = evaluatePCE(k1_pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
     k2_pce_uniform = convert2affinePCE(k2[1],k2[2],uniform01)
-    k2_samples = evaluatePCE(pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
+    k2_samples = evaluatePCE(k2_pce_uniform, sampleMeasure(Int(floor(sqrt(trajectories))),uniform01),uniform01)
     function prob(prob, i, repeat)
         c = floor(sqrt(trajectories))
 
@@ -100,4 +102,4 @@ function Save(dir)
 end
 
 Graph()
-Save("stable-poly-chaos")
+# Save("stable-poly-chaos")

@@ -1,7 +1,9 @@
 using DifferentialEquations
 using Plots; gr()
 using PolyChaos
+using Random
 
+Random.seed!(13)
 
 # Vars
 tSpan = (0.0,10.0)
@@ -66,5 +68,5 @@ sol = solve(probl, NLopt.LN_NELDERMEAD())
 
 # print(sol)
 Ensemble()
-Graph(sol.u[1])
-Save("poly-chaos-optimization")
+Graph(k[3])
+# Save("poly-chaos-optimization")
