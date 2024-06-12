@@ -24,10 +24,8 @@ Id = 0
 Is = 0
 Ic = 0
 
+# Stochastic Function
 w = 0.025*[1,0.4,0.4,0.4,1,1]
-
-
-# Function
 function func(du, u, p, t)
     du[1] = μ*u[1] - k1*(u[5]+u[6])*u[1] + D*(T-u[1])
     du[2] = k1*u[6]*u[1] - (k1*u[5]-μ)*u[2] - D*u[2]
